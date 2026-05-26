@@ -24,10 +24,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class SnackbarUpdateShower(private val fragment: Fragment) {
-    private var lastUserIntervention: Updater.Progress.NeedsUserIntervention? = null
-    private val intentLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        lastUserIntervention?.markAsDone()
+class SnackbarUpdateShower {
+    fun show(version: String) {
     }
 
     private class SwapableSnackbar(fragment: Fragment, view: View, anchor: View?) {
