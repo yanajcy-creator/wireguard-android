@@ -1,45 +1,44 @@
-name: build-arm64
+name: Build Android APK
 
 on:
-   workflow_dispatch:
-    inputs:
-      password:
-        description: '请输入签名证书密码：（不支持中文密码，且最少6位字符）'
-        required: false
-        default: 'password'
-env:
-  password: "${{ github.event.inputs.password }}"
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发构建
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: 检查仓库
-        uses: actions/checkout@v4
-        with:
-        #  repository: zhcode-fun/wireguard-android #使用zhcode-fun大佬的wireguard-android仓库
-         ref: dev-v1.0.20231018
-         submodules: true
-      - name: 设置JDK环境
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'microsoft'
-          java-version: 17
-      - name: 构建 APK
-        run: |
-          bash ./gradlew assembleRelease
-      - name: 签名
-        run: |
-          mkdir -p /opt/wg
-          mv ./ui/build/outputs/apk/release/ui-release-unsigned.apk /opt/wg/app-release-unsigned.apk
-          cd /opt/wg
-          # 生成签名文件keystore.jks
-          keytool -genkey -v -keystore keystore.jks -storepass $password -alias key -keypass $password -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android, OU=Android, O=Android, L=BeiJing, ST=BeiJing, C=CN"
-          # 启用谷歌v1 v2 v3 v4 签名方式同时签名
-          /usr/local/lib/android/sdk/build-tools/34.0.0/apksigner sign --ks keystore.jks --ks-key-alias key --ks-pass pass:$password --key-pass pass:$password --out wireguard-android.apk --in app-release-unsigned.apk --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --v4-signing-enabled true
-          rm app-release-unsigned.apk
-      - name : 上传
-        uses: actions/upload-artifact@master
-        if: always()
-        with:
-         name: wireguard-apk
-         path: /opt/wg/*
+    - name: 检出代码
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive  # 递归检出子模块
+    
+    - name: 设置 JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: 设置 Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: 授予 Gradle 执行权限
+      run: chmod +x gradlew
+    
+    - name: 构建 Release APK
+      run: ./gradlew assembleRelease
+      env:
+        ORG_GRADLE_PROJECT_ndkVersion: "25.2.9519653"
+    
+    - name: 上传 APK 作为构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: wireguard-android-apk
+        path: |
+          ui/build/outputs/apk/release/ui-release.apk
+          ui/build/outputs/apk/release/ui-release-unsigned.apk
+        retention-days: 7
