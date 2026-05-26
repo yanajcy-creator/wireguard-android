@@ -45,31 +45,31 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-object Updater {
-    private const val TAG = "WireGuard/Updater"
-    private const val UPDATE_URL_FMT = "https://download.wireguard.com/android-client/%s"
-    private const val APK_NAME_PREFIX = BuildConfig.APPLICATION_ID + "-"
-    private const val APK_NAME_SUFFIX = ".apk"
-    private const val LATEST_FILE = "latest.sig"
-    private const val RELEASE_PUBLIC_KEY_BASE64 = "RWTAzwGRYr3EC9px0Ia3fbttz8WcVN6wrOwWp2delz4el6SI8XmkKSMp"
-    private val CURRENT_VERSION by lazy { Version(BuildConfig.VERSION_NAME) }
+#object Updater {
+    #private const val TAG = "WireGuard/Updater"
+    #private const val UPDATE_URL_FMT = "https://download.wireguard.com/android-client/%s"
+    #private const val APK_NAME_PREFIX = BuildConfig.APPLICATION_ID + "-"
+    #private const val APK_NAME_SUFFIX = ".apk"
+    #private const val LATEST_FILE = "latest.sig"
+    #private const val RELEASE_PUBLIC_KEY_BASE64 = "RWTAzwGRYr3EC9px0Ia3fbttz8WcVN6wrOwWp2delz4el6SI8XmkKSMp"
+    #private val CURRENT_VERSION by lazy { Version(BuildConfig.VERSION_NAME) }
 
-    private val updaterScope = CoroutineScope(Job() + Dispatchers.IO)
+    #private val updaterScope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private fun installer(context: Context): String = try {
-        val packageName = context.packageName
-        val pm = context.packageManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            pm.getInstallSourceInfo(packageName).installingPackageName ?: ""
-        } else {
-            @Suppress("DEPRECATION")
-            pm.getInstallerPackageName(packageName) ?: ""
-        }
-    } catch (_: Throwable) {
-        ""
-    }
+    #private fun installer(context: Context): String = try {
+     #   val packageName = context.packageName
+     #   val pm = context.packageManager
+     #   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+     #       pm.getInstallSourceInfo(packageName).installingPackageName ?: ""
+     #   } else {
+     #       @Suppress("DEPRECATION")
+      #      pm.getInstallerPackageName(packageName) ?: ""
+     #   }
+    #} catch (_: Throwable) {
+    #    ""
+   # }
 
-    fun installerIsGooglePlay(context: Context): Boolean = installer(context) == "com.android.vending"
+   # fun installerIsGooglePlay(context: Context): Boolean = installer(context) == "com.android.vending"
 
     sealed class Progress {
         object Complete : Progress()
